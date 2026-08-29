@@ -13,6 +13,15 @@ workflows:
         - $HOME/.gradle/caches
         - $HOME/.gradle/wrapper
     scripts:
+      - name: Restore Android app folder
+        script: |
+          set -e
+          if [ ! -d app ]; then
+            test -f carmind-app-source.zip
+            unzip -q carmind-app-source.zip
+          fi
+          test -d app
+          echo "CarMind app source restored"
       - name: Verify project files
         script: |
           set -e
