@@ -1,0 +1,26 @@
+CAR MIND FINAL ONE-UPLOAD BUILD SET
+
+Upload/replace ALL FIVE files below in the ROOT of the GitHub repository:
+
+1. carmind-app-source.zip
+2. codemagic.yaml
+3. build.gradle.kts
+4. settings.gradle.kts
+5. gradle.properties
+
+Do not rename any of them.
+
+Then in Codemagic:
+- select branch: main
+- select workflow: CarMind AI Native - Debug APK
+- Start build
+
+This package deliberately uses:
+- Codemagic free-compatible mac_mini_m2
+- Java 17
+- Android API 35 already installed on Codemagic macOS
+- Gradle 8.9
+- Android Gradle Plugin 8.7.3
+- Kotlin 2.0.21
+
+The build performs preflight validation before compiling and stops with a clear error if a required project file is missing.

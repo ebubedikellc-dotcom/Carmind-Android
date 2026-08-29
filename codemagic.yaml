@@ -3,71 +3,109 @@ workflows:
     name: CarMind AI Native - Debug APK
     max_build_duration: 120
     instance_type: mac_mini_m2
+
     environment:
       java: 17
       vars:
-        PACKAGE_NAME: "online.carmindai.app"
         GRADLE_VERSION: "8.9"
+        PACKAGE_NAME: "online.carmindai.app"
+
     cache:
       cache_paths:
         - $HOME/.gradle/caches
         - $HOME/.gradle/wrapper
+
     scripts:
-      - name: Restore Android app folder
+      - name: Restore CarMind Android source
         script: |
-          set -e
-          if [ ! -d app ]; then
-            test -f carmind-app-source.zip
-            unzip -q carmind-app-source.zip
-          fi
+          set -euo pipefail
+          rm -rf app
+          test -f carmind-app-source.zip
+          unzip -q carmind-app-source.zip
           test -d app
           echo "CarMind app source restored"
 
-      - name: Verify project files
+      - name: Full preflight validation
         script: |
-          set -e
+          set -euo pipefail
+
           test -f settings.gradle.kts
           test -f build.gradle.kts
+          test -f gradle.properties
           test -f app/build.gradle.kts
           test -f app/src/main/AndroidManifest.xml
           test -f app/src/main/java/online/carmindai/app/MainActivity.kt
-          echo "CarMind source tree OK"
+          test -f app/src/main/java/online/carmindai/app/CarMindVoiceService.kt
+          test -f app/src/main/java/online/carmindai/app/BootReceiver.kt
+          test -f app/src/main/java/online/carmindai/app/NativeBridge.kt
+          test -f app/src/main/java/online/carmindai/app/JourneyAnnouncer.kt
+          test -f app/src/main/java/online/carmindai/app/CommandParser.kt
 
-      - name: Install Gradle 8.9
-        script: |
-          set -e
-          curl -L --retry 3 --fail -o /tmp/gradle.zip "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip"
-          rm -rf /tmp/gradle-${GRADLE_VERSION}
-          unzip -q /tmp/gradle.zip -d /tmp
-          echo "GRADLE_BIN=/tmp/gradle-${GRADLE_VERSION}/bin/gradle" >> "$CM_ENV"
-          /tmp/gradle-${GRADLE_VERSION}/bin/gradle --version
+          grep -q 'version "8.7.3"' build.gradle.kts
+          grep -q 'version "2.0.21"' build.gradle.kts
+          grep -q 'compileSdk = 35' app/build.gradle.kts
+          grep -q 'applicationId = "online.carmindai.app"' app/build.gradle.kts
 
-      - name: Prepare Android SDK
+          echo "Project files and versions look correct"
+
+      - name: Configure preinstalled Android SDK
         script: |
-          set -e
+          set -euo pipefail
+
+          test -n "${ANDROID_SDK_ROOT:-}"
           echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/local.properties"
-          yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager "platforms;android-35" "build-tools;35.0.0" >/dev/null
+
+          test -d "$ANDROID_SDK_ROOT/platforms/android-35"
+          test -d "$ANDROID_SDK_ROOT/build-tools"
+
+          echo "Android SDK root: $ANDROID_SDK_ROOT"
+          echo "Android API 35 is installed"
+          ls "$ANDROID_SDK_ROOT/build-tools" | tail -n 10
+
+      - name: Install required Gradle version
+        script: |
+          set -euo pipefail
+
+          curl -L --retry 5 --retry-delay 2 --fail             -o /tmp/gradle.zip             "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip"
+
+          rm -rf "/tmp/gradle-${GRADLE_VERSION}"
+          unzip -q /tmp/gradle.zip -d /tmp
+
+          GRADLE_BIN="/tmp/gradle-${GRADLE_VERSION}/bin/gradle"
+          test -x "$GRADLE_BIN"
+          echo "GRADLE_BIN=$GRADLE_BIN" >> "$CM_ENV"
+          "$GRADLE_BIN" --version
+
+      - name: Validate Gradle project
+        script: |
+          set -euo pipefail
+          "$GRADLE_BIN" help --stacktrace --no-daemon
 
       - name: Run unit tests
         script: |
-          set -e
-          "$GRADLE_BIN" testDebugUnitTest --stacktrace --no-daemon
+          set -euo pipefail
+          "$GRADLE_BIN" :app:testDebugUnitTest --stacktrace --no-daemon
 
-      - name: Build CarMind APK
+      - name: Build CarMind debug APK
         script: |
-          set -e
-          "$GRADLE_BIN" assembleDebug --stacktrace --no-daemon
+          set -euo pipefail
+          "$GRADLE_BIN" :app:assembleDebug --stacktrace --no-daemon
 
-      - name: Verify APK
+      - name: Verify APK artifact
         script: |
-          set -e
+          set -euo pipefail
+
           APK="app/build/outputs/apk/debug/app-debug.apk"
           test -f "$APK"
+          test -s "$APK"
+
+          echo "APK built successfully:"
           ls -lh "$APK"
-          sha256sum "$APK" | tee app/build/outputs/apk/debug/app-debug.apk.sha256
+
+          shasum -a 256 "$APK" | tee "$APK.sha256"
 
     artifacts:
       - app/build/outputs/apk/debug/app-debug.apk
       - app/build/outputs/apk/debug/app-debug.apk.sha256
       - app/build/reports/**
+      - app/build/test-results/**
