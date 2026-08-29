@@ -2,7 +2,7 @@ workflows:
   carmind-android-debug:
     name: CarMind AI Native - Debug APK
     max_build_duration: 120
-    instance_type: linux_x2
+    instance_type: mac_mini_m2
     environment:
       java: 17
       vars:
@@ -22,6 +22,7 @@ workflows:
           fi
           test -d app
           echo "CarMind app source restored"
+
       - name: Verify project files
         script: |
           set -e
@@ -31,31 +32,33 @@ workflows:
           test -f app/src/main/AndroidManifest.xml
           test -f app/src/main/java/online/carmindai/app/MainActivity.kt
           echo "CarMind source tree OK"
+
       - name: Install Gradle 8.9
         script: |
           set -e
-          if ! command -v gradle >/dev/null 2>&1 || ! gradle --version | grep -q "Gradle 8.9"; then
-            curl -L --retry 3 --fail -o /tmp/gradle.zip "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip"
-            rm -rf /tmp/gradle-${GRADLE_VERSION}
-            unzip -q /tmp/gradle.zip -d /tmp
-            export PATH="/tmp/gradle-${GRADLE_VERSION}/bin:$PATH"
-          fi
-          gradle --version
-          echo "GRADLE_BIN=$(command -v gradle)" >> "$CM_ENV"
+          curl -L --retry 3 --fail -o /tmp/gradle.zip "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip"
+          rm -rf /tmp/gradle-${GRADLE_VERSION}
+          unzip -q /tmp/gradle.zip -d /tmp
+          echo "GRADLE_BIN=/tmp/gradle-${GRADLE_VERSION}/bin/gradle" >> "$CM_ENV"
+          /tmp/gradle-${GRADLE_VERSION}/bin/gradle --version
+
       - name: Prepare Android SDK
         script: |
           set -e
           echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/local.properties"
           yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platforms;android-35" "build-tools;35.0.0" >/dev/null
+
       - name: Run unit tests
         script: |
           set -e
           "$GRADLE_BIN" testDebugUnitTest --stacktrace --no-daemon
+
       - name: Build CarMind APK
         script: |
           set -e
           "$GRADLE_BIN" assembleDebug --stacktrace --no-daemon
+
       - name: Verify APK
         script: |
           set -e
@@ -63,6 +66,7 @@ workflows:
           test -f "$APK"
           ls -lh "$APK"
           sha256sum "$APK" | tee app/build/outputs/apk/debug/app-debug.apk.sha256
+
     artifacts:
       - app/build/outputs/apk/debug/app-debug.apk
       - app/build/outputs/apk/debug/app-debug.apk.sha256
