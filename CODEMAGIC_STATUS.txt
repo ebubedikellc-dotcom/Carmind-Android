@@ -1,0 +1,23 @@
+CarMind AI Native v3 — Codemagic-ready
+
+Improved before first cloud build:
+- native Android/site bridge
+- speech recognition + TTS
+- configurable wake/assistant name
+- foreground microphone listening service
+- service wake lock for car-use resilience
+- boot/package-update receiver
+- Android 14+ compliant boot behavior: notification asks user to tap once before microphone listening starts
+- GPS + road/area transition announcements
+- route_instruction bridge for exact turn-by-turn instructions supplied by the CarMind backend/navigation provider
+- destination sync
+- navigation, music, video, dialer, SMS handoff
+- contact lookup
+- car mode / keep-screen-on support
+- Codemagic no longer depends on an incomplete Gradle wrapper; it installs Gradle 8.9 in the cloud
+- APK existence + SHA-256 verification
+
+Important Android limitation:
+Android 14+ prohibits a BOOT_COMPLETED receiver from directly starting a microphone foreground service. CarMind therefore posts a one-tap "CarMind AI is ready" notification after boot. Once the user opens/activates CarMind, the foreground listening service can remain active subject to the car unit's battery-management rules.
+
+True low-power 24/7 hotword detection should eventually use a dedicated on-device wake-word engine. Android SpeechRecognizer is retained here as the first functional voice path, but Android itself documents that SpeechRecognizer is not intended for indefinite continuous recognition.

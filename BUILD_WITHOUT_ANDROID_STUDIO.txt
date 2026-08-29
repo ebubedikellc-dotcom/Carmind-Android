@@ -1,0 +1,13 @@
+YOU DO NOT NEED ANDROID STUDIO.
+
+Easiest build method:
+1. Create/open a GitHub repository.
+2. Upload every file and folder from this CarMindNative-Complete project.
+3. Open the repository's Actions tab.
+4. Choose "Build CarMind Android APK".
+5. Press "Run workflow".
+6. When it finishes, open the completed run.
+7. Download the artifact named "CarMind-AI-debug-apk".
+8. Unzip it and install app-debug.apk on the Android/car device.
+
+The first APK is a test/debug build. After device testing, create a permanent signed release build for distribution.
