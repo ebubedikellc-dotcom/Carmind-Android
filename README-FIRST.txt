@@ -1,16 +1,29 @@
-CarMind v14 CHECKED (14.0.1)
+CarMind v18 — QUIET HANDS-FREE
 
-Use this package instead of the earlier v14 Android package.
+Use this instead of v17.
 
-Additional checks/fixes:
-- microphone loop does NOT start before payment/trial/owner/legacy access is confirmed
-- speech recognizer has backoff after errors instead of rapid restart loops
-- duplicate recognizer restarts are blocked
-- recognizer stops itself if access becomes inactive
-- "open <app>" uses Android launcher activities for better app discovery
-- all v13/v14 features remain, including Owner Free, Legacy Free, volume commands,
-  training sync, payments, parking, trips, weather, navigation and floating mic
+Important microphone changes:
+- Hands-free listening turns on automatically after customer setup and access confirmation.
+- Speak/Talk button stays only as backup.
+- CarMind prefers Android on-device recognition where supported.
+- Foreground notification is silent and non-vibrating.
+- When another app starts using the microphone for a voice note/call/camera,
+  CarMind backs off instead of repeatedly fighting for the mic.
+- AUDIO errors pause the wake listener for 15 seconds before retrying.
+- After the other recorder stops, CarMind waits briefly and resumes.
+- Wake phrase still uses the customer-selected Wake-up Name.
+- After wake greeting, the next speech is automatically treated as the command.
 
-Upload the same five root files to GitHub.
-Codemagic workflow:
-CarMind v14 CHECKED Legacy-Free - Debug APK
+All v17 features remain:
+customer name/profile, Car Name, Wake-up Name, home/work, media preference,
+natural commands, volume, Spotify/YouTube, Bluetooth/Wi-Fi intentions,
+flashlight, apps, navigation, weather, journey context, contacts, calls/messages,
+parking, trips, maintenance, training, pricing/trial/payment, Legacy Free, Owner Free.
+
+Reality:
+Android manufacturers can still impose microphone/background restrictions.
+This build is designed to avoid the rapid restart/noise loop and microphone fighting
+that caused the repeated "prum/prum" behavior.
+
+Build:
+CarMind v18 Quiet Hands-Free - Debug APK

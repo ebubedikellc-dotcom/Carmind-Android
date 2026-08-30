@@ -1,6 +1,6 @@
 workflows:
   carmind-android-debug:
-    name: CarMind v14 CHECKED Legacy-Free - Debug APK
+    name: CarMind v18 Quiet Hands-Free - Debug APK
     max_build_duration: 120
     instance_type: mac_mini_m2
     environment:
@@ -13,15 +13,16 @@ workflows:
           set -euo pipefail
           rm -rf app
           unzip -q carmind-app-source.zip
-          test -f app/src/main/java/online/carmindai/app/SystemCommandController.kt
-          test -f app/src/main/java/online/carmindai/app/CommerceClient.kt
-          grep -q 'versionCode = 14' app/build.gradle.kts
-          grep -q 'legacyFree' app/src/main/java/online/carmindai/app/CommerceClient.kt
-          grep -q 'accessCheckInFlight' app/src/main/java/online/carmindai/app/MainActivity.kt
-          grep -q 'commerceStatusKnown && prefs.commerceAccessActive' app/src/main/java/online/carmindai/app/MainActivity.kt
-          grep -q 'restartScheduled' app/src/main/java/online/carmindai/app/CarMindVoiceService.kt
-          grep -q 'CATEGORY_LAUNCHER' app/src/main/java/online/carmindai/app/SystemCommandController.kt
-      - name: Configure SDK
+          test -f app/src/main/java/online/carmindai/app/CustomerProfile.kt
+          test -f app/src/main/java/online/carmindai/app/CarMindVoiceService.kt
+          test -f app/src/main/java/online/carmindai/app/SmartIntentBrain.kt
+          grep -q 'versionCode = 18' app/build.gradle.kts
+          grep -q 'AudioRecordingCallback' app/src/main/java/online/carmindai/app/CarMindVoiceService.kt
+          grep -q 'externalRecordingPauseUntil' app/src/main/java/online/carmindai/app/CarMindVoiceService.kt
+          grep -q 'createOnDeviceSpeechRecognizer' app/src/main/java/online/carmindai/app/CarMindVoiceService.kt
+          grep -q 'setSound(null, null)' app/src/main/java/online/carmindai/app/CarMindVoiceService.kt
+          grep -q 'prefs.continuousListening = true' app/src/main/java/online/carmindai/app/MainActivity.kt
+      - name: Configure Android SDK
         script: |
           set -euo pipefail
           test -n "${ANDROID_SDK_ROOT:-}"
