@@ -1,14 +1,25 @@
-CarMind v22.2 SDK-FIX
+CarMind ONE — CLEAN UNIFIED ANDROID
 
-This package fixes the Codemagic failure:
-ZipException: Error on ZipFile unknown archive
-while preparing Android SDK Build-Tools 34.0.0.
+This is the frozen Android build package that replaces the earlier version chain.
 
-Fix:
-- removes any explicit Build-Tools 34 pin
-- uses compileSdk 35 / targetSdk 35
-- clears any corrupted Build-Tools 34 partial install/cache before Gradle runs
-- preserves the v22.1 Treatment diagnostics and app code
+Includes:
+- Customer name/profile, Car Name, Wake-up Name, home/work
+- Quiet hands-free listening, Nigerian-English input preference, polished English speech
+- No legacy TALK/SPEAK UI
+- One-box training + owner knowledge
+- Automatic Android diagnostics to the server/control panel
+- Volume, flashlight, app opening
+- Music: asks which app if none is selected, remembers the answer, then plays
+- Spotify / YouTube Music / YouTube + supported installed media apps
+- Weather, location, navigation, route guidance, journey context
+- Contacts, calls/messages
+- Parking memory, trips, maintenance, floating microphone
+- Feature flags, trial/payment, Legacy Free, Owner Free
 
-Build workflow:
-CarMind v22.2 SDK-FIX Treatment Diagnostics - Debug APK
+Android platform limits still apply to protected system controls and background microphone behavior.
+
+
+REMOTE DOCTOR MIRROR:
+The app now sends a safe technical heartbeat every 30 seconds while it is running.
+The server/control panel can create a temporary read-only Mirror Link for support diagnosis.
+No voice recordings, private messages, contacts, passwords or payment secrets are mirrored.
