@@ -1,18 +1,14 @@
-CarMind v22.1 Treatment Diagnostics FIXED
+CarMind v22.2 SDK-FIX
 
-Exact compile error fixed:
-MainActivity.kt:1723:9 — Unresolved reference 'webView'
+This package fixes the Codemagic failure:
+ZipException: Error on ZipFile unknown archive
+while preparing Android SDK Build-Tools 34.0.0.
 
-The TALK-button removal helper now calls the actual WebView field:
-web
+Fix:
+- removes any explicit Build-Tools 34 pin
+- uses compileSdk 35 / targetSdk 35
+- clears any corrupted Build-Tools 34 partial install/cache before Gradle runs
+- preserves the v22.1 Treatment diagnostics and app code
 
-All v22 diagnostics remain:
-- Android diagnostic reporting to Treatment
-- wake/microphone errors
-- training match
-- command received / not understood
-- media/navigation/Bluetooth/access reports
-- all previous CarMind app functions preserved
-
-Build:
-CarMind v22.1 Treatment Diagnostics FIXED - Debug APK
+Build workflow:
+CarMind v22.2 SDK-FIX Treatment Diagnostics - Debug APK

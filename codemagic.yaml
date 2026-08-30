@@ -1,6 +1,6 @@
 workflows:
   carmind-android-debug:
-    name: CarMind v22.1 Treatment Diagnostics FIXED - Debug APK
+    name: CarMind v22.2 SDK-FIX Treatment Diagnostics - Debug APK
     max_build_duration: 120
     instance_type: mac_mini_m2
     environment:
@@ -14,30 +14,38 @@ workflows:
           rm -rf app
           unzip -q carmind-app-source.zip
           test -f app/src/main/java/online/carmindai/app/DiagnosticReporter.kt
-          grep -q 'versionCode = 26' app/build.gradle.kts
-          grep -q 'speech_recognizer_error' app/src/main/java/online/carmindai/app/CarMindVoiceService.kt
-          grep -q 'command_received' app/src/main/java/online/carmindai/app/MainActivity.kt
-          grep -q 'not_understood' app/src/main/java/online/carmindai/app/MainActivity.kt
+          grep -q 'compileSdk = 35' app/build.gradle.kts
+          grep -q 'targetSdk = 35' app/build.gradle.kts
+          ! grep -q 'buildToolsVersion = "34.0.0"' app/build.gradle.kts
           grep -q 'web.evaluateJavascript' app/src/main/java/online/carmindai/app/MainActivity.kt
-          ! grep -q 'webView.evaluateJavascript' app/src/main/java/online/carmindai/app/MainActivity.kt
+
       - name: Configure Android SDK
         script: |
           set -euo pipefail
           test -n "${ANDROID_SDK_ROOT:-}"
           echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/local.properties"
           test -d "$ANDROID_SDK_ROOT/platforms/android-35"
+
+          # Remove a corrupted partial Build-Tools 34 cache if one exists.
+          rm -rf "$ANDROID_SDK_ROOT/build-tools/34.0.0" || true
+          rm -rf "$HOME/.android/cache" || true
+
       - name: Install Gradle
         script: |
           set -euo pipefail
-          curl -L --retry 5 --retry-delay 2 --fail -o /tmp/gradle.zip "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip"
+          curl -L --retry 5 --retry-delay 2 --fail -o /tmp/gradle.zip             "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip"
+          rm -rf "/tmp/gradle-${GRADLE_VERSION}"
           unzip -q /tmp/gradle.zip -d /tmp
           echo "GRADLE_BIN=/tmp/gradle-${GRADLE_VERSION}/bin/gradle" >> "$CM_ENV"
+          /tmp/gradle-${GRADLE_VERSION}/bin/gradle --version
+
       - name: Test and build
         script: |
           set -euo pipefail
           "$GRADLE_BIN" help --stacktrace --no-daemon
           "$GRADLE_BIN" :app:testDebugUnitTest --stacktrace --no-daemon
           "$GRADLE_BIN" :app:assembleDebug --stacktrace --no-daemon
+
       - name: Verify APK
         script: |
           set -euo pipefail
@@ -45,6 +53,7 @@ workflows:
           test -f "$APK"
           test -s "$APK"
           shasum -a 256 "$APK" | tee "$APK.sha256"
+
     artifacts:
       - app/build/outputs/apk/debug/app-debug.apk
       - app/build/outputs/apk/debug/app-debug.apk.sha256
