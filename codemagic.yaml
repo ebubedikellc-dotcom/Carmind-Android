@@ -1,6 +1,6 @@
 workflows:
   carmind-android-debug:
-    name: CarMind v12 Owner-Control Sync - Debug APK
+    name: CarMind v14 CHECKED Legacy-Free - Debug APK
     max_build_duration: 120
     instance_type: mac_mini_m2
     environment:
@@ -13,11 +13,14 @@ workflows:
           set -euo pipefail
           rm -rf app
           unzip -q carmind-app-source.zip
+          test -f app/src/main/java/online/carmindai/app/SystemCommandController.kt
           test -f app/src/main/java/online/carmindai/app/CommerceClient.kt
-          test -f app/src/main/java/online/carmindai/app/LocalTrainingBrain.kt
-          grep -q 'versionCode = 12' app/build.gradle.kts
-          grep -q 'state.trainingBox' app/src/main/java/online/carmindai/app/MainActivity.kt
-          grep -q 'appSettings' app/src/main/java/online/carmindai/app/CommerceClient.kt
+          grep -q 'versionCode = 14' app/build.gradle.kts
+          grep -q 'legacyFree' app/src/main/java/online/carmindai/app/CommerceClient.kt
+          grep -q 'accessCheckInFlight' app/src/main/java/online/carmindai/app/MainActivity.kt
+          grep -q 'commerceStatusKnown && prefs.commerceAccessActive' app/src/main/java/online/carmindai/app/MainActivity.kt
+          grep -q 'restartScheduled' app/src/main/java/online/carmindai/app/CarMindVoiceService.kt
+          grep -q 'CATEGORY_LAUNCHER' app/src/main/java/online/carmindai/app/SystemCommandController.kt
       - name: Configure SDK
         script: |
           set -euo pipefail
