@@ -1,0 +1,7 @@
+CarMind ONE runtime/internal check
+- Pure Kotlin intent/training/profile/wake tests: 17/17 PASS
+- Fixed Wi-Fi voice normalization for "Wi-Fi" and "wi fi"
+- AndroidManifest.xml parses
+- Server JavaScript syntax passes node --check
+- Server install/merge shell scripts pass bash -n
+- Real Android hardware behavior still requires Codemagic APK + phone test

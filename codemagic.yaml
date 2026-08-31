@@ -1,0 +1,70 @@
+workflows:
+  carmind-android-debug:
+    name: CarMind ONE - FINAL Main App
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    environment:
+      java: 17
+      vars:
+        GRADLE_VERSION: "8.9"
+    scripts:
+      - name: Restore and validate source
+        script: |
+          set -euo pipefail
+          rm -rf app
+          unzip -q carmind-app-source.zip
+          test -f app/src/main/java/online/carmindai/app/DiagnosticReporter.kt
+          test -f app/src/main/java/online/carmindai/app/CarMindVoiceService.kt
+          test -f app/src/main/java/online/carmindai/app/MediaRouter.kt
+          test -f app/src/main/java/online/carmindai/app/LocalTrainingBrain.kt
+          grep -q 'versionCode = 120' app/build.gradle.kts
+          grep -q 'compileSdk = 35' app/build.gradle.kts
+          grep -q 'targetSdk = 35' app/build.gradle.kts
+          grep -q 'handlePendingMediaChoice' app/src/main/java/online/carmindai/app/MainActivity.kt
+          grep -q 'DiagnosticReporter' app/src/main/java/online/carmindai/app/MainActivity.kt
+          grep -q 'LocalTrainingBrain.findAnswer' app/src/main/java/online/carmindai/app/MainActivity.kt
+          grep -q 'vosk-android:0.3.75' app/build.gradle.kts
+          grep -q 'VoskModelManager' app/src/main/java/online/carmindai/app/CarMindVoiceService.kt
+          grep -q 'ShizukuProvider' app/src/main/AndroidManifest.xml
+          test -f app/src/main/aidl/online/carmindai/app/IPrivilegedShell.aidl
+          test -f app/src/main/java/online/carmindai/app/PrivilegedShellService.kt
+          grep -q 'voiceEngine' app/src/main/java/online/carmindai/app/AppPrefs.kt
+          grep -q 'androidControlEngine' app/src/main/java/online/carmindai/app/AppPrefs.kt
+          grep -q 'navigationEngine' app/src/main/java/online/carmindai/app/AppPrefs.kt
+          ! test -f app/src/main/java/online/carmindai/app/CarMindAccessibilityService.kt
+
+      - name: Configure Android SDK
+        script: |
+          set -euo pipefail
+          test -n "${ANDROID_SDK_ROOT:-}"
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/local.properties"
+          test -d "$ANDROID_SDK_ROOT/platforms/android-35"
+          rm -rf "$ANDROID_SDK_ROOT/build-tools/34.0.0" || true
+          rm -rf "$HOME/.android/cache" || true
+
+      - name: Install Gradle
+        script: |
+          set -euo pipefail
+          curl -L --retry 5 --retry-delay 2 --fail             -o /tmp/gradle.zip             "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip"
+          rm -rf "/tmp/gradle-${GRADLE_VERSION}"
+          unzip -q /tmp/gradle.zip -d /tmp
+          echo "GRADLE_BIN=/tmp/gradle-${GRADLE_VERSION}/bin/gradle" >> "$CM_ENV"
+
+      - name: Unit tests and APK build
+        script: |
+          set -euo pipefail
+          "$GRADLE_BIN" help --stacktrace --no-daemon
+          "$GRADLE_BIN" :app:testDebugUnitTest --stacktrace --no-daemon
+          "$GRADLE_BIN" :app:assembleDebug --stacktrace --no-daemon
+
+      - name: Verify APK
+        script: |
+          set -euo pipefail
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+          test -f "$APK"
+          test -s "$APK"
+          shasum -a 256 "$APK" | tee "$APK.sha256"
+
+    artifacts:
+      - app/build/outputs/apk/debug/app-debug.apk
+      - app/build/outputs/apk/debug/app-debug.apk.sha256

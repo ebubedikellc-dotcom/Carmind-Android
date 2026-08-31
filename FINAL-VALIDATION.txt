@@ -1,0 +1,29 @@
+CarMind ONE — FINAL Main App
+
+DEFAULT ENGINE SELECTION
+- Voice: Vosk (selected by default)
+- Android advanced control: Shizuku (selected by default when user grants Shizuku permission)
+- Navigation: CarMind route engine (selected by default)
+
+INSTALLED BACKUPS (not competing at the same time)
+- Android SpeechRecognizer backup
+- Native Android control/settings-panel backup
+- External navigation app backup
+
+ADDED/CONFIRMED
+- Shizuku UserService privileged allow-list for Wi-Fi, Bluetooth, mobile data and media key actions
+- Compatibility Shizuku process fallback while UserService connects
+- Vosk offline speech + Android speech fallback
+- Owner-controlled engine selection synced from the server
+- Remote Doctor diagnostics
+- Existing training, owner profile, media, navigation, parking, trip, maintenance and commerce/access logic retained
+
+INTERNAL CHECKS PASSED
+- AndroidManifest parses as XML
+- Required Android source/dependency files present
+- Server Node syntax passes
+- Server Bash installer scripts pass syntax checks
+- Engine defaults/selectors are wired into Android and server source
+
+IMPORTANT
+This is source/runtime-logic validation. The final proof of microphone, Shizuku privileges, Wi-Fi/Bluetooth switching, GPS and third-party media behavior requires the Codemagic APK on a real Android phone.
