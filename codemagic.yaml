@@ -1,0 +1,39 @@
+workflows:
+  carmind-two-apps:
+    name: Carmind Car and Carmind Mobile APKs
+    max_build_duration: 60
+    environment:
+      java: 17
+      node: lts
+    scripts:
+      - name: Open Carmind project
+        script: |
+          rm -rf carmind-src
+          mkdir carmind-src
+          unzip -q Carmind-project.zip -d carmind-src
+      - name: Build shared Carmind interface
+        script: |
+          cd carmind-src
+          npm ci
+          npm run build
+          mkdir -p android/app/src/main/assets/www
+          cp dist/index.html android/app/src/main/assets/www/index.html
+          test -s android/app/src/main/assets/www/index.html
+      - name: Build both Android applications
+        script: |
+          cd carmind-src/android
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          chmod +x gradlew
+          ./gradlew clean :app:assembleDebug :phone:assembleDebug --stacktrace
+    artifacts:
+      - carmind-src/android/app/build/outputs/apk/debug/app-debug.apk
+      - carmind-src/android/phone/build/outputs/apk/debug/phone-debug.apk
+      - carmind-src/android/app/build/reports/**
+      - carmind-src/android/phone/build/reports/**
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+          source: true
