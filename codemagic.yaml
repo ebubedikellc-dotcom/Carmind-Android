@@ -1,0 +1,38 @@
+workflows:
+  android-debug-apk:
+    name: Carmind AI - Installable Debug APK
+    max_build_duration: 60
+    environment:
+      java: 17
+      node: lts
+    scripts:
+      - name: Unpack the complete Carmind project
+        script: |
+          rm -rf "$CM_BUILD_DIR/carmind-build"
+          mkdir -p "$CM_BUILD_DIR/carmind-build"
+          unzip -q "$CM_BUILD_DIR/Carmind-source.zip" -d "$CM_BUILD_DIR/carmind-build"
+          test -f "$CM_BUILD_DIR/carmind-build/package.json"
+          test -f "$CM_BUILD_DIR/carmind-build/android/app/build.gradle"
+      - name: Build the Carmind interface
+        working_directory: carmind-build
+        script: |
+          npm ci
+          npm run build
+          mkdir -p android/app/src/main/assets/www
+          cp dist/index.html android/app/src/main/assets/www/index.html
+      - name: Build installable Android APK
+        working_directory: carmind-build/android
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          chmod +x gradlew
+          ./gradlew clean assembleDebug --stacktrace
+    artifacts:
+      - carmind-build/android/app/build/outputs/apk/debug/*.apk
+      - carmind-build/android/app/build/reports/**
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+          source: true
