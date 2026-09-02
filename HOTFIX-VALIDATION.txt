@@ -1,8 +1,0 @@
-CarMind hands-free/media/mirror hotfix
-- Legacy TALK button hidden.
-- Active entitlement forces continuous hands-free listener ON, including upgrades from older stored prefs.
-- VoiceService emits 30-second listener heartbeat diagnostics.
-- Music requests use MediaRouter and auto-select best installed music provider if no preference is saved.
-- User-facing media wording says car, not phone.
-- Mirror diagnostics now match customer by customerId OR hashed installId, fixing early/blank customerId reports.
-Static checks completed; real Android hardware behavior still requires APK test.
