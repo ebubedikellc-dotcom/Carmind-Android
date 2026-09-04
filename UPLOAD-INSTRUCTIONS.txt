@@ -1,0 +1,64 @@
+CARMIND FINAL TABLET UPLOAD — 2 ANDROID APPS
+
+Upload these TWO files to the main/root page of the GitHub repository:
+
+1. Carmind-project.zip
+2. codemagic.yaml
+
+Do not open Carmind-project.zip and do not upload its internal folders.
+Both files must appear on the first page of the GitHub repository, beside each other.
+
+CodeMagic reads codemagic.yaml, opens Carmind-project.zip during the build, and produces:
+
+- app-debug.apk = Carmind Car for the Android car screen
+- phone-debug.apk = Carmind Mobile for the normal Android phone
+
+This v1.5.2 build downloads and compiles the free MIT-licensed whisper.cpp
+engine with the quantized Whisper small.en model. Whisper is the primary
+recognizer for Nigerian-accented English; Vosk remains a compatibility
+fallback. The finished APKs are therefore considerably larger than before.
+
+The recognizer uses beam-search decoding, automatic microphone gain, echo
+cancellation, quieter-voice detection and a short audio pre-roll so the first
+word of a command is not lost. It listens silently, separates speech using natural pauses, and
+does not use Android's repeating recognizer start sound. Carmind's selected
+British speaking voice is unchanged.
+
+Version 1.5.2 also fixes the red Start-button fault: Android requests the
+microphone separately, starts only after permission is granted, registers the
+screen callback before startup, and reacquires the audio route after returning
+from calls, settings or Android Auto.
+
+This revision also routes Carmind replies as Android navigation/assistant
+speech. Android Auto or Bluetooth media should duck while Carmind speaks and
+return to its previous level when the reply ends.
+
+Customers can choose Carmind Priority or Android Auto Compatible under
+Settings > Car audio control. Carmind Priority pauses competing audio while
+Carmind speaks and includes a shortcut to Android Auto's system settings.
+
+The default is Android Auto Compatible so music continues at a lower volume
+while Carmind speaks. The package also contains the three-hour server-backed
+trial, monthly/yearly subscription verification, owner Exit PIN, Nigerian
+English command normalisation, contact calling, connected-phone music,
+incoming-call status, and voice control of the Carmind media library.
+
+Both apps connect to https://carmindai.online. When local matching is uncertain,
+the private server's Qwen3 8B model interprets the intended meaning. Carmind
+still validates every result against its approved command list before doing
+anything. Install Carmind-Control-Server-Qwen-v1.5.0 on that domain first;
+otherwise the apps will use their local command and conversation fallbacks.
+
+IMPORTANT TEST LIMITS
+
+- Install app-debug.apk on the Android car screen.
+- Install phone-debug.apk on the normal Android phone.
+- Android may warn about a sideloaded debug app because calling, microphone,
+  contacts and Bluetooth are sensitive permissions. A public customer release
+  must be signed and distributed through a trusted store/testing track.
+- WhatsApp notification reading is intentionally excluded from the debug APK
+  because sideloaded notification-listener apps are commonly blocked. Keep the
+  source integration for the properly signed production release.
+- YouTube and Spotify decide whether an external track may autoplay. Carmind
+  can open the requested result, but cannot bypass those apps' account or
+  playback policies.
