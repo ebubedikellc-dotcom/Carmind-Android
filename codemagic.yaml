@@ -1,0 +1,86 @@
+workflows:
+  android-debug-apk:
+    name: Carmind AI - Installable Debug APK
+    max_build_duration: 60
+    environment:
+      java: 17
+      node: lts
+      vars:
+        PACKAGE_NAME: "ai.carmind.car"
+    cache:
+      cache_paths:
+        - $HOME/.gradle/caches
+        - $CM_BUILD_DIR/node_modules
+    scripts:
+      - name: Open Carmind project
+        script: |
+          test -s Carmind-project.zip
+          unzip -q -o Carmind-project.zip -d .
+          test -s package.json
+          test -s package-lock.json
+          test -d android/app
+          test -d android/phone
+      - name: Install web dependencies
+        script: npm ci
+      - name: Build the Carmind interface
+        script: npm run build
+      - name: Add accurate offline Nigerian-English recognition
+        script: |
+          chmod +x scripts/prepare-whisper.sh
+          scripts/prepare-whisper.sh
+      - name: Bundle the interface inside Android
+        script: |
+          mkdir -p android/app/src/main/assets/www
+          cp dist/index.html android/app/src/main/assets/www/index.html
+          test -s android/app/src/main/assets/www/index.html
+      - name: Set Android SDK location
+        script: echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+      - name: Build installable debug APK
+        script: |
+          cd android
+          chmod +x gradlew
+          ./gradlew clean assembleDebug --stacktrace
+    artifacts:
+      - android/app/build/outputs/apk/debug/*.apk
+      - android/phone/build/outputs/apk/debug/*.apk
+      - android/app/build/reports/**
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+          source: true
+
+  android-release-aab:
+    name: Carmind AI - Unsigned Release Bundle
+    max_build_duration: 60
+    environment:
+      java: 17
+      node: lts
+      vars:
+        PACKAGE_NAME: "ai.carmind.car"
+    scripts:
+      - name: Open Carmind project
+        script: |
+          test -s Carmind-project.zip
+          unzip -q -o Carmind-project.zip -d .
+          test -s package.json
+          test -s package-lock.json
+          test -d android/app
+          test -d android/phone
+      - name: Build and bundle Carmind
+        script: |
+          npm ci
+          npm run build
+          chmod +x scripts/prepare-whisper.sh
+          scripts/prepare-whisper.sh
+          mkdir -p android/app/src/main/assets/www
+          cp dist/index.html android/app/src/main/assets/www/index.html
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+          cd android
+          chmod +x gradlew
+          ./gradlew bundleRelease -PversionCode=$BUILD_NUMBER -PversionName=1.0.$BUILD_NUMBER --stacktrace
+    artifacts:
+      - android/app/build/outputs/bundle/release/*.aab
+      - android/phone/build/outputs/bundle/release/*.aab
