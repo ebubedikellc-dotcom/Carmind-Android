@@ -1,0 +1,21 @@
+CARMIND AI 1.7.6 — LOUD, CLEAR CAR VOICE — TWO-APP ANDROID SOURCE
+
+Give this complete ZIP to Emeka. He should extract both ZIP layers, delete the
+old GitHub repository contents, and upload the CONTENTS of Carmind-project to
+the repository root. package.json, codemagic.yaml and android must be visible
+at the root. Commit main and run “Carmind AI - Installable Debug APK” in
+CodeMagic. app-debug.apk is Carmind Car; phone-debug.apk is Carmind Mobile.
+
+Version 1.7.6 preserves the original interface. It prevents the first reply
+from being discarded while Android Text-to-Speech starts. Before speaking it
+leaves the narrow, quiet Bluetooth call channel and uses the normal loud media
+output. It speaks at a natural 1.05 rate, then rebuilds the Bluetooth microphone
+route for the next command. British English remains the preferred fallback.
+
+It retains all v1.7.4/v1.7.5 wake-model, Whisper/Vosk, car-noise, overlapping
+recorder, return-to-app and speech watchdog repairs. CodeMagic downloads and
+verifies the free Whisper model and includes it in the completed APK.
+
+Uninstall the previous APK before installing this build. Allow Microphone and
+Nearby Devices, and ensure Android Speech Services by Google is enabled. Test
+the final APK on the actual Android phone and through the car's Bluetooth.
