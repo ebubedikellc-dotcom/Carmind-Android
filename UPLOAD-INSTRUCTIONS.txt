@@ -1,0 +1,18 @@
+CARMIND AI — THREE-FILE GITHUB UPLOAD
+
+This delivery is made for GitHub's file uploader. It avoids uploading project
+folders individually.
+
+1. Extract Carmind-GitHub-THREE-FILE-Upload-v2.0.4.zip.
+2. Delete the old contents of the GitHub repository.
+3. Upload only these three extracted files to the repository's main/root page:
+   - Carmind-project.zip
+   - codemagic.yaml
+   - UPLOAD-INSTRUCTIONS.txt
+4. Do not extract Carmind-project.zip before uploading it to GitHub.
+5. Confirm all three files are visible on the main branch.
+6. In CodeMagic, refresh the repository configuration.
+7. Run the workflow named "Carmind AI - Installable Debug APK".
+
+CodeMagic will extract Carmind-project.zip automatically and build both Android
+apps. Do not mix these files with any older Carmind delivery.
