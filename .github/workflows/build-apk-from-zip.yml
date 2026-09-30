@@ -1,0 +1,87 @@
+name: Build Carmind APK from zip
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - Carmind-project.zip
+      - .github/workflows/build-apk-from-zip.yml
+
+jobs:
+  build-apk:
+    name: Build Android APKs
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Unpack Carmind project
+        run: |
+          rm -rf project
+          mkdir project
+          unzip -q Carmind-project.zip -d project
+          test -f project/package.json
+          test -f project/android/settings.gradle
+          test -f project/android/app/build.gradle
+          test -f project/android/phone/build.gradle
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: project/package-lock.json
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Verify Android SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          test -d "$ANDROID_HOME"
+
+      - name: Install web dependencies
+        working-directory: project
+        run: npm ci
+
+      - name: Verify Carmind app wiring
+        working-directory: project
+        run: |
+          npm run test:commands
+          npm run test:wiring
+
+      - name: Build Carmind web interface
+        working-directory: project
+        run: |
+          npm run build
+          mkdir -p android/app/src/main/assets/www
+          cp dist/index.html android/app/src/main/assets/www/index.html
+
+      - name: Add offline Vosk voice model
+        working-directory: project
+        run: |
+          chmod +x scripts/prepare-vosk.sh
+          scripts/prepare-vosk.sh
+
+      - name: Build Android debug APKs
+        working-directory: project/android
+        run: |
+          chmod +x gradlew
+          ./gradlew clean assembleDebug --stacktrace
+
+      - name: Upload Carmind APK files
+        uses: actions/upload-artifact@v4
+        with:
+          name: Carmind-Android-APKs
+          path: |
+            project/android/app/build/outputs/apk/debug/app-debug.apk
+            project/android/phone/build/outputs/apk/debug/phone-debug.apk
+          if-no-files-found: error
+          retention-days: 14
